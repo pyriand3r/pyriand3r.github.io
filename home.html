@@ -1,0 +1,19 @@
+---
+layout: default
+title: Scriptaholic
+---
+
+<div id="home" ng-controller="listCtrl">
+  <h1>Newest Articles</h1>
+  <ul class="posts">
+    {% for post in site.posts %}
+      <li>
+      	<span class="post_categories {% for categorie in post.categories %}{{categorie}} {% endfor %}">
+      		{% for categorie in post.categories %}{{categorie}} {% endfor %}
+      	</span>
+      	<span class="post_date">{{ post.date | date_to_string }}</span> &raquo; <a class="post_link" href="{{ post.url }}">{{ post.title }}</a></br>
+      	<span class="post_excerpt">{{ post.excerpt }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</div>

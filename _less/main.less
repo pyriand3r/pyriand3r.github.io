@@ -1,0 +1,332 @@
+@import "reset.less";
+
+@font-face {
+    font-family: 'Consolas';
+    src: url('../data/Consolas.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: #eeeeee;
+    color: #222222;
+    font-family: "Droid Sans", sans-serif;
+}
+
+pre {
+    white-space: pre-wrap;
+}
+
+a {
+    color: #7a0001;
+    text-decoration: none;
+}
+
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
+code {
+    padding: 0 3px;
+    background-color: #eee;
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    font-family: 'Consolas', monospace;
+}
+
+ol {
+    margin: 18px 0 18px 50px;
+    list-style: upper-roman;
+    line-height: 20px;
+
+    li {
+        margin: 6px 0 0 0;
+    }
+}
+
+#home {
+    margin: 0 10px 0 10px;
+}
+
+#header {
+    max-width: 75%;
+    min-width: 640px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .title {
+        font-size: 300%;
+        font-family: "Share Tech Mono";
+        font-weight: bold;
+
+        a, a:hover, a:visited {
+            color: #7a0001;
+        }
+    }
+}
+
+#navigation {
+    position: fixed;
+    top: 149px;
+    right: 0px;
+    margin-top: 10px;
+    width: 24px;
+    font-family: "Droid Sans", sans-serif;
+    font-weight: bold;
+    transition: all 0.5s;
+
+    &:hover {
+        width: 120px;
+    }
+
+    ul {
+        padding-left: 24px;
+        box-shadow: 20px 3px 10px -5px #555, 20px -1px 10px -5px #555;
+        -mox-box-shadow: 20px 3px 10px -5px #555, 20px -1px 10px -5px #555;
+    }
+
+    li {
+        background-color: #fefefe;
+        color: #458e97;
+        padding: 10px;
+
+        &:hover {
+            background-color: #dedede;
+        }
+    }
+}
+
+.rotate {
+    border-top: solid 6px #7a0001;
+    background-color: #fefefe;
+    height: 19px;
+    width: 80px;
+    padding: 3px 8px;
+    position: absolute;
+    left: -40px;
+    top: 33px;
+    box-shadow: 0px -4px 10px -6px #222;
+    -mox-box-shadow: 0px -4px 10px -6px #222;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform-origin: 50% 50%;
+    -ms-transform-origin: 50% 50%;
+    -o-transform-origin: 50% 50%;
+    transform-origin: 50% 50%;
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+.spacer {
+    height: 60px;
+    margin: 0 0 -60px 0;
+    background: transparent;
+}
+
+#content-container {
+    max-width: 60%;
+    min-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#content {
+    max-width: 60%;
+    min-width: 640px;
+    position: absolute;
+    padding: 20px 15px;
+
+    &.ng-enter,
+    &.ng-leave {
+        -webkit-transition: 0.5s linear all;
+        transition: 0.5s linear all;
+    }
+
+    &.ng-enter {
+        opacity: 0;
+        margin-top: 25px;
+    }
+
+    &.ng-leave.ng-leave-active {
+        opacity: 0;
+    }
+
+    &.ng-leave,
+    &.ng-enter.ng-enter-active {
+        opacity: 1;
+        margin-top: 0;
+    }
+
+    h1 {
+        font-size: 230%;
+        font-weight: bold;
+        color: #458e97;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 200%;
+        font-weight: bold;
+        color: #458e97;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        font-size: 120%;
+        font-weight: bold;
+        font-style: italic;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        margin-left: -10px;
+        padding-left: 10px;
+        border-bottom: 2px solid #bbb;
+    }
+
+    .meta {
+        color: #cb7f09;
+    }
+
+    p {
+        font-size: 100%;
+        line-height: 20px;
+        margin-top: 5px;
+    }
+} 
+
+.posts {
+    li {
+        border-left: solid 6px #7a0001;
+        padding: 20px;
+        margin-top: 15px;
+        background-color: #fefefe;
+        box-shadow: 0px 0px 10px -5px #222222;
+        -moz-box-shadow: 0px 0px 10px -5px #222222;
+
+        &:hover {
+            background-color: #dedede;
+        }
+    }
+}
+
+.post_link {
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #7a0001;
+}
+
+.post_excerpt {
+    margin-left: 115px;
+    margin-top: 10px;
+    text-align: justify;
+    display: block;
+}
+
+.post_categories {
+    font-size: small;
+    float: right;
+    color: #458e97;
+}
+
+.hide {
+    display: none;
+}
+
+.article {
+    background-color: #fefefe;
+    padding: 10px;
+    border-left: solid 6px #7a0001;
+    box-shadow: 0px 0px 10px -5px #222222;
+    -moz-box-shadow: 0px 0px 10px -5px #222222;
+}
+
+.expandable {
+    border-left: 6px solid #7a0001;
+    background-color: #fefefe;
+    height: 29px;
+    overflow: hidden;
+    padding: 10px;
+    margin-top: 20px;
+    box-shadow: 0px 0px 10px -5px #222222;
+    -moz-box-shadow: 0px 0px 10px -5px #222222;
+}
+
+#footer_container {
+    background-color: #dddddd;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 22px;
+    font-size: 90%;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    .contact {
+        float: right;
+        margin-right: 20px;
+    }
+
+    a {
+        text-decoration: none;
+        color: #458e97;
+    }
+}
+
+#disqus_thread {
+    margin-top: 25px;
+    padding: 25px 15% 0 15%;
+    border-top: solid 3px #7a0001;
+}
+
+.warning {
+    background-color: #ffc66d;
+    margin: 5px 5px 5px -10px;
+    padding: 10px;
+    border-top: 3px solid #ddb55c;
+    border-bottom: 3px solid #ddb55c;
+    border-right: 3px solid #ddb55c;
+
+    code {
+        background-color: #ddb55c;
+        padding: 0 3px;
+        border: 1px solid #cca44b;
+        border-radius: 3px;
+        font-family: 'Ubuntu Mono', monospace;
+    }
+}
+
+blockquote {
+    background-color: #a3bbc1;
+    margin: 10px -10px;
+    padding: 10px;
+    border-top: 3px solid #92aab0;
+    border-bottom: 3px solid #92aab0;
+    height: 13px;
+    overflow: hidden;
+
+    code {
+        background-color: #92aab0;
+        padding: 0 3px;
+        border: 1px solid #8199af;
+        border-radius: 3px;
+        font-family: 'Ubuntu Mono', monospace;
+    }
+
+    h4 {
+        font-weight: bold;
+        font-size: 110%;
+    }
+}
+
+/*@import "syntax_dark.less";*/
+@import "syntax_monokai.less";

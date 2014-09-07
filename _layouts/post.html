@@ -1,0 +1,23 @@
+---
+layout: default
+---
+
+<div class="article" ng-controller="expandableCtrl">
+	<h2>{{ page.title }}
+		<span class="post_categories {% for categorie in page.categories %}{{categorie}} {% endfor %}">
+      		{% for categorie in page.categories %}{{categorie}} {% endfor %}
+      	</span>
+	</h2>
+	<p class="meta">{{ page.date | date_to_string }}</p>
+
+	<div class="post">
+		{{ content }}
+	</div>
+
+	{% if page.comments %}
+	<dir-disqus disqus-shortname="scriptaholic"
+         disqus-identifier="{{ page.id }}"
+         disqus-url="http://pyriand3r.no-ip.org/#!/{{ page.id }}">
+	</dir-disqus>
+	{% endif %}
+</div>
