@@ -6,100 +6,135 @@ comments: true
 excerpt: Do you have a big ext3 frontend you can't easily migrate to ext5 but still want to use the new ext5 features like MVC or MVVM for new views? Here's a solution for you.
 ---
 
-> #### Background Story
+> #### For Gods sake ... WHY???
 > 
-> My company distributes a software that makes use of an excessive ext.js 3.4 frontend. When ext.js 4 came out we said "Oh well, we don't have the time to migrate now. We will do that later." That was kind of a mistake that often happens, because now it's even harder. The frontend is bigger, has even more custom parts and - guess what - we still don't have the time. 
->
->So we decided to come up with a different approach: Since version 4 ext.js provides a sandbox mode that allows the use of different ext.js versions on the same project by changing the ext namespace. We decided to find a way to use ext5 elements inside ext3 so we can develop new modules using the advantages of ext5 without the need of refactoring the whole frontend.
+> Good question. Normally i would say the same. Why the hell would you want to do that? You should never ever mix two versions of a framework together into one project. But i did it, because i had to. My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of view, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can not do that at once. We have to migrade one view after another. First step in this was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. For this purpose it is okay i think, but i would **never** recommend this approach as a long time solution!
 
----
+Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment.
 
->#### Ext5 inside ext3? Wtf? Why?
->
->Yes,  that's a good question. In my case we had a big frontend with lots of custom classes,  all written using and extending ext.js 3.4. We want to migrate soon, but we don't have the manpower to do that at once. We need to migrate one view after another. So we decided to integrate ext5 into our ext3 environment as a first step to be able to develop new modules and views using ext5. 
+## Preparing the sources
 
----
+All you need from Ext5 are the sandbox files which you can find in the builds folder. You will need the ext5-sandbox.js and the classic-sandbox theme.
 
->#### pro vs. contra
->
->If you follow this approach you will be able to use ext5 containers inside ext3 containers (like in my case an ext5 panel inside an ext3 tab panel) . It is **not possible** to really mix both together (like using ext5 buttons inside an ext3 formular). Although listening on events "cross-platform" is only possible through some workarounds. 
+## The Ext5Container class
 
-### Disclaimer
-This approach is a workaround to be used for a short period of time and is not recommended to be used as a real solution. The only real solution can be to migrate your entire application.  But this approach can help you to migrate slowly without the need to change at once. 
-
-### The Ext5Container.js class
-The idea is simple: Create an ext3 container (let's say a panel) with a div with a unique id inside and render an ext5 container (containder/panel/...) into that div.
-
-First you need to add the Ext5 sandbox sources to your project
+For my wrapper class i extended an `Ext.Panel` but you can also use any other ext container that can define a `html` element, as we need this to render the Ext5 to. Furthermore we will define everything we need inside the `initComponent` of the class and add some default values with the `Ext.apply()` and `Ext.applyIf()` methods:
 
 {% highlight javascript %}
 
-(function (Ext3, Ext) {
-	'use strict';
+pyriand3r.util.Ext5Container = Ext.extend(Ext.Panel, {
  
-	Ext.ns('pyriand3r.util');
- 
-	/**
-	 * @class pyriand3r.util.Ext5Container
-	 * This class provides a panel for an Ext5 application inside an Ext3.4 environment.
-	 *
-	 * @extends Ext.Panel
-	 */
-	pyriand3r.util.Ext5Container = Ext.extend('Ext.Panel', {
- 
-		/**
-		 * Initiate panel with Ext5 container.
-		 */
-		initComponent: function (layout) {
-			var me = this;
-			this.components = {};
- 
-			Ext.apply(this, {
-				html: '<div style="width: 100%; height: 100%;" id="' + me.getContainerId() + '"></div>'
-			});
- 
-			pyriand3r.util.Ext5Container.superclass.initComponent.call(this);
- 
-			this.addListener('afterrender', function () {
-					me.getContainer(layout);
-				}
-			);
-			this.addListener('resize', function (that, adjWidth, adjHeight, rawWidth, rawHeight) {
-					me.components.container.setSize(adjWidth, adjHeight);
-				}
-			)
-		},
- 
-		/**
-		 * @method
-		 * Return the Ext5 container. Lazy
-		 *
-		 * @returns {*}
-		 */
-		getContainer: function (layout) {
-			if (!Ext.isObject(this.components.container)) {
- 
-				this.components.container = new Ext5.container.Container({
-					layout: {
-						type: layout,
-						align: 'stretch'
-					},
-					renderTo: Ext5.get(this.getContainerId())
-				});
-			}
-			return this.components.container;
-		},
- 
-		/**
-		 * @method
-		 * Return id of container-div for Ext5 application
-		 *
-		 * @returns {string}
-		 */
-		getContainerId: function () {
-			return this.id + '_container';
-		}
-	});
-}(Ext, Ext5));
+    initComponent: function () {
+        var me = this;
+        this.components = {};
+    
+        // create a containerConfig object if none was passed
+        Ext.applyIf(this, {
+            containerConfig: {}
+        });
+    
+        // add a default layout
+        Ext.applyIf(this.containerConfig, {
+            layout: {
+                type: 'fit',
+                align: 'stretch'
+            }
+        });
+    
+        // set the id of the html element the ext5 container will be 
+        // rendered to.
+        Ext.apply(this.containerConfig, {
+            renderTo: this.getContainerId()
+        });
+    
+        // set up the ext3 classes html element to contain a fully expanded
+        // div with the same id as defined for the renderTo variable of the
+        // ext5 container.
+        Ext.apply(this, {
+            html: '<div style="width: 100%; height: 100%;" id="' + 
+                me.getContainerId() + 
+                '"></div>',
+            items: {}
+        });
+    }
+});
 
 {% endhighlight %}
+
+As we need a unique id for the div the Ext5 container should be rendered to, we have to define a `getContainerId()` method that returns this id:
+
+{% highlight javascript %}
+
+/**
+     * @method
+     * Return the id of the container-div.
+     *
+     * @returns {string}
+     */
+    getContainerId: function () {
+        return this.id + '_container';
+    }
+
+{% endhighlight %}
+
+That's an easy one: Just get the unique id of the ext3 container and add something to it, like `_container`. As easy as f...
+
+Last thing we need to do is to get the ext5 container to render into the div. Important for this is that this can only be done after the ext3 element is rendered, because the div has to exist when we add the ext5 container to it. So we add a listener to the `afterrender` event of the ext3 container:
+
+{% highlight javascript %}
+
+initComponent: function () {
+    
+    ...
+
+    this.addListener('afterrender', function () {
+                me.getContainer();
+            }
+        );
+    },
+
+    /**
+     * @method
+     * Return the ext5 container. Lazy
+     *
+     * @returns {Ext5.container.Container}
+     */
+    getContainer: function () {
+        if (!Ext.isObject(this.components.container)) {
+            this.components.container = new Ext5.container.Container(this.containerConfig);
+        }
+        return this.components.container;
+    },
+
+    ...
+}
+
+{% endhighlight %}
+
+>#### Reusable lazy
+>The `getContainer()` method is lazy which makes it reusable to get access to the container after it has been created.
+
+That's it on the whole. Now you can add any Ext5 view you wish to the ext5 container [as described below](#Ext5Container_use). But there still some small things to do.
+
+First the ext5 containers dimensions won't fit because after render the ext3 component and therefore the div will not have the right dimensions (at least in my case it was the case). It will expand immediatly but this happens after the ext5 container is initialized, ending up with a unusable small ext5 container. Fortunately the ext3 parent will emit a `resize` event after it has expanded we can listen to to adjust the width and height of our ext5 container.
+
+Second the ext5 container and the ext5 view within does not have any direct connection to the ext3 environment surrounding it. So if the ext3 container is destroyed, the ext5 won't notice and therefore the destroy-event won't bubble to it which will end in browser memory bloated with unused ext5 class objects. To solve this issue we can add a second listener and this time we will listen to the `destroy` event of the ext3 parent and to pass it to the ext5:
+
+{% highlight javascript %}
+
+this.addListener('resize', function (that, adjWidth, adjHeight) {
+    me.getContainer().setSize(adjWidth, adjHeight);
+});
+
+this.addListener('destroy', function () {
+    me.getContainer().destroy();
+});
+
+{% endhighlight %}
+
+> #### Passing events
+> 
+> As said
+
+
+## Using the Ext5Container class<a name="Ext5Container_use"></a>
