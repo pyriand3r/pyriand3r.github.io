@@ -6,9 +6,9 @@ comments: true
 excerpt: Do you have a big ext3 frontend you can't easily migrate to ext5 but still want to use the new ext5 features like MVC or MVVM for new views? Here's a solution for you.
 ---
 
-> #### For Gods sake ... WHY???
+>#### For Gods sake ... WHY???
 > 
-> Good question. Normally i would say the same. Why the hell would you want to do that? You should never ever mix two versions of a framework together into one project. But i did it, because i had to. My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of view, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can not do that at once. We have to migrade one view after another. First step in this was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. For this purpose it is okay i think, but i would **never** recommend this approach as a long time solution!
+>Good question. Normally i would say the same. Why the hell would you want to do that? You should never ever mix two versions of a framework together into one project. But i did it, because i had to. My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of view, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can not do that at once. We have to migrade one view after another. First step in this was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. For this purpose it is okay i think, but i would **never** recommend this approach as a long time solution!
 
 Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment.
 
@@ -118,7 +118,7 @@ That's it on the whole. Now you can add any Ext5 view you wish to the ext5 conta
 
 First the ext5 containers dimensions won't fit because after render the ext3 component and therefore the div will not have the right dimensions (at least in my case it was the case). It will expand immediatly but this happens after the ext5 container is initialized, ending up with a unusable small ext5 container. Fortunately the ext3 parent will emit a `resize` event after it has expanded we can listen to to adjust the width and height of our ext5 container.
 
-Second the ext5 container and the ext5 view within does not have any direct connection to the ext3 environment surrounding it. So if the ext3 container is destroyed, the ext5 won't notice and therefore the destroy-event won't bubble to it which will end in browser memory bloated with unused ext5 class objects. To solve this issue we can add a second listener and this time we will listen to the `destroy` event of the ext3 parent and to pass it to the ext5:
+Second the ext5 container and the ext5 view within does not have any direct connection to the ext3 environment surrounding it. So if the ext3 container is destroyed, the ext5 won't notice and therefore the destroy-event is not forwarded to it which will end in browser memory bloated with unused ext5 class objects. To solve this issue we can add a second listener and this time we will listen to the `destroy` event of the ext3 parent and to pass it to the ext5:
 
 {% highlight javascript %}
 
@@ -132,9 +132,13 @@ this.addListener('destroy', function () {
 
 {% endhighlight %}
 
-> #### Passing events
-> 
-> As said
+>#### Passing events
+>Because the Ext5 is not aware of the ext3 surrounding it, one has to listen to automated ext3 events manually and reimplement the behaviour. There are different possiblities to do so i can think of.
+>
+>First you can add listeners to explicit events with the `addListener()` method like we did before with the destroy and resize event.
 
+>Second you can add an `Ext.util.Observable` object to your class (best inside the `initComponent()`). With it's `capture()` method you can 
+
+The full class is available as a Gist: [Ext5Container.js](https://gist.github.com/pyriand3r/be5f91ee2de560a62a82)
 
 ## Using the Ext5Container class<a name="Ext5Container_use"></a>
