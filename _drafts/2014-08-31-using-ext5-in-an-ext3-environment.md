@@ -136,9 +136,30 @@ this.addListener('destroy', function () {
 >Because the Ext5 is not aware of the ext3 surrounding it, one has to listen to automated ext3 events manually and reimplement the behaviour. There are different possiblities to do so i can think of.
 >
 >First you can add listeners to explicit events with the `addListener()` method like we did before with the destroy and resize event.
+>
+>Second you can add an `Ext.util.Observable` object to your class (best inside the `initComponent()`). With it's `capture()` method you can catch **all** events an Ext object throws and react on it:
+>
+{% highlight javascript %}
 
->Second you can add an `Ext.util.Observable` object to your class (best inside the `initComponent()`). With it's `capture()` method you can 
+iniComponent: function () {
+    
+    ...
+    
+    Ext.util.Observable.capture(myObj, function(evname) {
+        console.log(evname, arguments);
+        
+        //Here you can intercept or forward the events or react to them.
+    });
+};
+
+{% endhighlight %}
 
 The full class is available as a Gist: [Ext5Container.js](https://gist.github.com/pyriand3r/be5f91ee2de560a62a82)
 
 ## Using the Ext5Container class<a name="Ext5Container_use"></a>
+
+Now that we have a wrapper class for Ext5, we can begin developing new views. To start with a clean codebase (as far as possible if you're mixing two versions of the same framework together already) i recommend creating a wrapper-container class for every main view you want to create inheriting of the Ext5Container. If you insert your main view into the created Ext5 container you can keep your code clean to use it without changes after getting rid of Ext3:
+
+{% highlight javascript %}
+
+{% endhighlight %}
