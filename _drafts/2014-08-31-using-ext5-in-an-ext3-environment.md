@@ -1,20 +1,24 @@
 ---
 layout: post
-title: Using ext5 in an ext3 environment 
+title: Using Ext5 in an Ext3 environment 
 categories: javascript 
 comments: true
-excerpt: Do you have a big ext3 frontend you can't easily migrate to ext5 but still want to use the new ext5 features like MVC or MVVM for new views? Here's a solution for you.
+excerpt: In a project i needed to integrate the new version 5 of Sencha's Ext.js framework into an Ext3.4 environment. Here's how i did the trick.
 ---
 
 >#### For Gods sake ... WHY???
 > 
->Good question. Normally i would say the same. Why the hell would you want to do that? You should never ever mix two versions of a framework together into one project. But i did it, because i had to. My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of view, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can not do that at once. We have to migrade one view after another. First step in this was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. For this purpose it is okay i think, but i would **never** recommend this approach as a long time solution!
+>Good question. Normally i would say the same. Why the hell would you want to do that? You should never ever mix two versions of a framework together into one project. But i did it, because i had to. 
 
-Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment.
+>My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of views, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can't do that at once. We have to migrade one view after another. First step in this process was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. 
+
+Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment. To keep the example: Create a whole Ext5 form and place it inside an Ext3 popup.
+
+**IMPORTANT**: For my purpose as a temporary arrangement this solution is okay i think, but i would **never** recommend this approach as a long time solution!
 
 ## Preparing the sources
 
-All you need from Ext5 are the sandbox files which you can find in the builds folder. You will need the ext5-sandbox.js and the classic-sandbox theme.
+All you need from Ext5 are the sandbox files which you can find in the build folder. You will need the *ext5-sandbox.js* and the classic-sandbox theme located under `packages/ext-theme-classic-sandbox`. This is the only working theme for the sandbox mode shipped with Ext5 as all css-classes are prefixed with `ext5-`.
 
 ## The Ext5Container class
 
@@ -139,20 +143,16 @@ this.addListener('destroy', function () {
 >
 >Second you can add an `Ext.util.Observable` object to your class (best inside the `initComponent()`). With it's `capture()` method you can catch **all** events an Ext object throws and react on it:
 >
-{% highlight javascript %}
-
-iniComponent: function () {
-    
-    ...
-    
-    Ext.util.Observable.capture(myObj, function(evname) {
-        console.log(evname, arguments);
-        
-        //Here you can intercept or forward the events or react to them.
-    });
-};
-
-{% endhighlight %}
+><div class="highlight"><pre><code class="language-javascript" data-lang=">javascript"><span class="nx">iniComponent</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+>    
+>    <span class="p">...</span>
+>    
+>    <span class="nx">Ext</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">Observable</span><span class="p">.</span><span class="nx">capture</span><span class="p">(</span><span class="nx">myObj</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evname</span><span class="p">)</span> <span class="p">{</span>
+>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evname</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+>        
+>        <span class="c1">//Here you can intercept or forward the events or react to them.</span>
+>    <span class="p">});</span>
+><span class="p">};</span></code></pre></div>
 
 The full class is available as a Gist: [Ext5Container.js](https://gist.github.com/pyriand3r/be5f91ee2de560a62a82)
 
@@ -162,4 +162,76 @@ Now that we have a wrapper class for Ext5, we can begin developing new views. To
 
 {% highlight javascript %}
 
+(function (Ext3, Ext) {
+    "use strict";
+
+    /**
+     * @class pyriander.view.MainViewCompatibilityContainer
+     * The compatibility container to get a Ext5 environment inside an Ext3.4 panel.
+     *
+     * @extends pyriand3r.util.Ext5Container
+     */
+    Ext3.define('pyriander.view.MainViewCompatibilityContainer', {
+        extend: 'pyriand3r.util.Ext5Container',
+
+        /**
+         * @constructor
+         */
+        initComponent: function () {
+            var me = this;
+
+            pyriand3r.view.CompatibilityContainer.superclass.initComponent.call(this);
+
+            this.addListener(
+                'afterrender', function () {
+                    me.getContainer().add(me.getMyExt5View());
+                }
+            );
+        },
+
+        /**
+         * @method
+         * Returns an instance of the myExt5View. Lazy
+         *
+         * @returns {pyriand3r.view.MyExt5View}
+         */
+        getMyExt5View: function () {
+            var me = this;
+            if (!Ext.isObject(this.components.myExt5View)) {
+                this.components.myExt5View = Ext.create('pyriand3r.view.MyExt5View', {
+                    svid: me.svid,
+                    setTabTitle: function (title) {
+                        me.setTitle(title);
+                    }
+                });
+            }
+            return this.components.myExt5View;
+        }
+    });
+}(Ext, Ext5));
+
 {% endhighlight %}
+
+In this example there are several things to mention:
+
+1. First of all you can add your own view into the Ext5 container using the `afterrender` event and adding it to the container. This way you fully abstract your new views from the wrapper class allowing yourself to use the view later without modification, as soon as you got rid of the legacy Ext3.
+2. In all my Ext5 classes i use a closure-function around the whole class: 
+    
+    <div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Ext3</span><span class="p">,</span> <span class="nx">Ext</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="p">...</span>
+
+    <span class="p">}(</span><span class="nx">Ext</span><span class="p">,</span> <span class="nx">Ext5</span><span class="p">))</span></code></pre></div>
+
+    This trick translates the namespaces from the two Ext version, so i can refer to the sandbox version as the normal `Ext` while the legacy version 3.4 gets the sandbox namespace Ext3. Once you get rid of the legacy version you only have to remove the closure function and everything will work fine, because you refer in all your new classes to `Ext` instead of `Ext5`.
+
+3. If you want to interact with the Ext3 wrapper class from inside the Ext5 view you can add custom functions to your view in the config object you pass to it during creation. For instance i needed to be able to change the tab title from inside my view, so i added a function for this:
+
+    <div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">this</span><span class="p">.</span><span class="nx">components</span><span class="p">.</span><span class="nx">myExt5View</span> <span class="o">=</span> <span class="nx">Ext</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="s1">'pyriand3r.view.MyExt5View'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="nx">svid</span><span class="o">:</span> <span class="nx">me</span><span class="p">.</span><span class="nx">svid</span><span class="p">,</span>
+        <span class="nx">setTabTitle</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">me</span><span class="p">.</span><span class="nx">setTitle</span><span class="p">(</span><span class="nx">title</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">});</span></code></pre></div>
+
+That's it. I hope i could help and ... Happy coding!
