@@ -12,7 +12,7 @@ excerpt: In a project i needed to integrate the new version 5 of Sencha's Ext.js
 
 >My company distributes a software that makes use of a really huge ext.js 3.4 frontend - lots of views, custom classes etc. We need to upgrade to Ext4 or better Ext5 ... but we can't do that at once. We have to migrade one view after another. First step in this process was having the ability to create new views directly in Ext5 to not produce more classes that need to be migrated. 
 
-Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment. To keep the example: Create a whole Ext5 form and place it inside an Ext3 popup.
+Some words before we start: This approach makes it possible to use Ext5 views inside Ext3 views. Allthough it is not possible to mix both really together: For instance you can't use an Ext5 button inside an ext3 form. But you can create whole new views making use of the advantages of Ext5 (MVC, MVVM) and place them inside a bigger Ext3 environment. To keep the example: You can create a whole Ext5 form and place it inside an Ext3 popup.
 
 **IMPORTANT**: For my purpose as a temporary arrangement this solution is okay i think, but i would **never** recommend this approach as a long time solution!
 
@@ -83,7 +83,8 @@ As we need a unique id for the div the Ext5 container should be rendered to, we 
 
 That's an easy one: Just get the unique id of the ext3 container and add something to it, like `_container`. As easy as f...
 
-Last thing we need to do is to get the ext5 container to render into the div. Important for this is that this can only be done after the ext3 element is rendered, because the div has to exist when we add the ext5 container to it. So we add a listener to the `afterrender` event of the ext3 container:
+Last thing we need to do is to get the ext5 container to render into the div. Important for this is that this can only be done after the ext3 element is rendered, because the div has to exist when we add the ext5 container to it. So we add a listener to the `afterrender` event of the ext3 container. 
+Above we've set the `renderTo` attribute of the containerConfig to the id of the div. This tells ext.js, that the Ext5 container shall be inserted inside this div in dem DOM. Otherweise it would be rendered directly to the body of the site.
 
 {% highlight javascript %}
 
@@ -115,14 +116,14 @@ initComponent: function () {
 
 {% endhighlight %}
 
->#### Reusable lazy
+>#### Lazy methods = creater and getter in one
 >The `getContainer()` method is lazy which makes it reusable to get access to the container after it has been created.
 
-That's it on the whole. Now you can add any Ext5 view you wish to the ext5 container [as described below](#Ext5Container_use). But there still some small things to do.
+That's it on the whole. Now you can add any Ext5 view you wish to the ext5 container [as described below](#Ext5Container_use). But there are still some small things to do.
 
-First the ext5 containers dimensions won't fit because after render the ext3 component and therefore the div will not have the right dimensions (at least in my case it was the case). It will expand immediatly but this happens after the ext5 container is initialized, ending up with a unusable small ext5 container. Fortunately the ext3 parent will emit a `resize` event after it has expanded we can listen to to adjust the width and height of our ext5 container.
+First the ext5 containers dimensions won't fit because after render the ext3 component and therefore the div will not have the right dimensions (at least in my case it was the case). The ext3 component will expand immediatly but this happens after the ext5 container is initialized, ending up with a unusable small ext5 container. Fortunately the ext3 parent will emit a `resize` event after it has expanded we can listen to to adjust the width and height of our ext5 container.
 
-Second the ext5 container and the ext5 view within does not have any direct connection to the ext3 environment surrounding it. So if the ext3 container is destroyed, the ext5 won't notice and therefore the destroy-event is not forwarded to it which will end in browser memory bloated with unused ext5 class objects. To solve this issue we can add a second listener and this time we will listen to the `destroy` event of the ext3 parent and to pass it to the ext5:
+Second the ext5 container and the ext5 view within does not have any direct connection to the ext3 environment surrounding it (for instance the ext5 can't listen and therefore can't react on the `resize` event itself, as mentioned above). So if the ext3 container is destroyed, the ext5 won't notice because the destroy-event is not forwarded to it which will end in browser memory bloated with unused ext5 class objects. To solve this issue we can add a second listener and this time we will listen to the `destroy` event of the ext3 parent and pass it to the ext5:
 
 {% highlight javascript %}
 
@@ -137,9 +138,9 @@ this.addListener('destroy', function () {
 {% endhighlight %}
 
 >#### Passing events
->Because the Ext5 is not aware of the ext3 surrounding it, one has to listen to automated ext3 events manually and reimplement the behaviour. There are different possiblities to do so i can think of.
+>Because the Ext5 is not aware of the ext3 surrounding it, one has to listen to automated ext3 events manually and reimplement the behaviour. There are different possiblities to do so i can think of:
 >
->First you can add listeners to explicit events with the `addListener()` method like we did before with the destroy and resize event.
+>First you can add listeners to explicit events with the `addListener()` method like we did before with the destroy and resize event. This way you produce clear code.
 >
 >Second you can add an `Ext.util.Observable` object to your class (best inside the `initComponent()`). With it's `capture()` method you can catch **all** events an Ext object throws and react on it:
 >
@@ -153,6 +154,11 @@ this.addListener('destroy', function () {
 >        <span class="c1">//Here you can intercept or forward the events or react to them.</span>
 >    <span class="p">});</span>
 ><span class="p">};</span></code></pre></div>
+>
+>But this possibility seems to make no sense in my eyes except you want to pass all events with the third possibility:
+>
+>You could relay the events with the `relayEvent()` method of the Ext3 component you're using. This way you can reemit all events from the Ext5 component:
+><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">this</span><span class="p">.</span><span class="nx">relayEvent</span><span class="p">(</span><span class="s1">'eventName'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">getContainer</span><span class="p">());</span></code></pre></div>
 
 The full class is available as a Gist: [Ext5Container.js](https://gist.github.com/pyriand3r/be5f91ee2de560a62a82)
 
@@ -180,7 +186,7 @@ Now that we have a wrapper class for Ext5, we can begin developing new views. To
         initComponent: function () {
             var me = this;
 
-            pyriand3r.view.CompatibilityContainer.superclass.initComponent.call(this);
+            pyriand3r.view.MainViewCompatibilityContainer.superclass.initComponent.call(this);
 
             this.addListener(
                 'afterrender', function () {
@@ -199,7 +205,6 @@ Now that we have a wrapper class for Ext5, we can begin developing new views. To
             var me = this;
             if (!Ext.isObject(this.components.myExt5View)) {
                 this.components.myExt5View = Ext.create('pyriand3r.view.MyExt5View', {
-                    svid: me.svid,
                     setTabTitle: function (title) {
                         me.setTitle(title);
                     }
@@ -228,7 +233,6 @@ In this example there are several things to mention:
 3. If you want to interact with the Ext3 wrapper class from inside the Ext5 view you can add custom functions to your view in the config object you pass to it during creation. For instance i needed to be able to change the tab title from inside my view, so i added a function for this:
 
     <div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">this</span><span class="p">.</span><span class="nx">components</span><span class="p">.</span><span class="nx">myExt5View</span> <span class="o">=</span> <span class="nx">Ext</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="s1">'pyriand3r.view.MyExt5View'</span><span class="p">,</span> <span class="p">{</span>
-        <span class="nx">svid</span><span class="o">:</span> <span class="nx">me</span><span class="p">.</span><span class="nx">svid</span><span class="p">,</span>
         <span class="nx">setTabTitle</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">me</span><span class="p">.</span><span class="nx">setTitle</span><span class="p">(</span><span class="nx">title</span><span class="p">);</span>
         <span class="p">}</span>
