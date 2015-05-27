@@ -174,14 +174,6 @@ ol {
 ol li {
   margin: 6px 0 0 0;
 }
-ul {
-  margin: 18px 0 18px 50px;
-  list-style: disc;
-  line-height: 20px;
-}
-ul li {
-  margin: 6px 0 0 0;
-}
 br {
   border: 1px solid #ddd;
   margin-left: -10px;
@@ -360,6 +352,14 @@ br {
   border-left: solid 6px #7a0001;
   box-shadow: 0px 0px 10px -5px #222222;
   -moz-box-shadow: 0px 0px 10px -5px #222222;
+}
+.article ul {
+  margin: 18px 0 18px 50px;
+  list-style: disc;
+  line-height: 20px;
+}
+.article ul li {
+  margin: 6px 0 0 0;
 }
 .expandable {
   border-left: 6px solid #7a0001;
