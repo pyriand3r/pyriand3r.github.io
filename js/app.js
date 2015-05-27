@@ -79,7 +79,6 @@
 			});
 
 			$('blockquote').on('click', function () {
-				console.log('clicked');
 				if ($(this).hasClass('expanded')) {
 					$(this).removeClass('expanded');
 					$(this).animate({
