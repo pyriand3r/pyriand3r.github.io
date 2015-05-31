@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Creating a web application with silex and react.js
-categories: javascript, php
+categories: javascript, php, eidolon
 comments: true
 excerpt: Setting up an easily extensible and well scaling web app is always a pain in the a**. In this series I will blog about setting up and get running my new project 'Eidolon'. A web based photo managment tool.
 ---
